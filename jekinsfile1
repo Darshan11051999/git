@@ -1,0 +1,45 @@
+pipeline{
+    agent any 
+    stages
+    {
+        stage('continous download')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/maven2.git' 
+            }
+        }
+        stage('continus build')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('continus deploy')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'fbc4e964-224c-4d7a-95dc-9252083d4e6d', path: '', url: 'http://172.31.36.127:8080')], contextPath: 'deapp', war: '**/*.war'
+            }
+        }
+        stage('continus testing')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/FunctionalTesting.git'
+                sh 'java  -jar  /var/lib/jenkins/workspace/declarepipeline/testing.jar'
+            }
+        }
+        stage('continus delivery')
+        {
+            steps
+            {
+                input 'plz.give me the permission for product delivery. '
+                deploy adapters: [tomcat9(credentialsId: '56eba6c3-10d9-4524-8837-7f6a3db650b9', path: '', url: 'http://172.31.42.100:8080')], contextPath: 'sham', war: '**/*.war'
+            }
+        }
+    }
+    
+    
+}
